@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Školský rozcestník</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: radial-gradient(circle at center, #ffffff, #eef2f7);
+  overflow: hidden;
+  transition: 0.3s;
+}
+
+/* DARK MODE */
+body.dark {
+  background: radial-gradient(circle, #1e2a38, #0f1720);
+  color: white;
+}
+
+/* TOGGLE */
+#themeToggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  border: none;
+  background: white;
+  padding: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* KONTAJNER */
+.container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* LOGO */
+.center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 140px;
+  height: 140px;
+  transform: translate(-50%, -50%) scale(0.85);
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  animation: pulse 2s infinite;
+  z-index: 5;
+}
+
+.center img {
+  width: 100%;
+  height: 100%;
+}
+
+/* PULZ */
+@keyframes pulse {
+  0% { transform: translate(-50%, -50%) scale(0.85); }
+  50% { transform: translate(-50%, -50%) scale(1); }
+  100% { transform: translate(-50%, -50%) scale(0.85); }
+}
+
+/* ITEM */
+.item {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  color: white;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transform: translate(-50%, -50%) scale(0.3);
+  opacity: 0;
+  transition: all 0.7s cubic-bezier(0.68,-0.55,0.27,1.55);
+  cursor: pointer;
+}
+
+.item:hover {
+  transform: translate(-50%, -50%) scale(1.2) !important;
+}
+
+/* ROZLET */
+.container.loaded .item1 { transform: rotate(0deg) translate(260px) rotate(0deg); opacity:1; background:#2D8CFF;}
+.container.loaded .item2 { transform: rotate(72deg) translate(260px) rotate(-72deg); opacity:1; background:#FF8C42;}
+.container.loaded .item3 { transform: rotate(144deg) translate(260px) rotate(-144deg); opacity:1; background:#28C76F;}
+.container.loaded .item4 { transform: rotate(216deg) translate(260px) rotate(-216deg); opacity:1; background:#9B59B6;}
+.container.loaded .item5 { transform: rotate(288deg) translate(260px) rotate(-288deg); opacity:1; background:#F1C40F;}
+
+.item1 { transition-delay:0.1s;}
+.item2 { transition-delay:0.2s;}
+.item3 { transition-delay:0.3s;}
+.item4 { transition-delay:0.4s;}
+.item5 { transition-delay:0.5s;}
+
+.icon { font-size:26px; }
+
+/* ZOOM */
+.zooming .item { transform: scale(0.2)!important; opacity:0;}
+.zooming .center { transform: translate(-50%, -50%) scale(3); opacity:0; transition:0.5s;}
+
+/* MOBILE */
+@media(max-width:600px){
+  body { overflow:auto;}
+  .container { display:flex; flex-direction:column; align-items:center; padding-top:40px;}
+  .item { position:static; transform:none!important; opacity:1!important; margin:10px;}
+  .center { position:static; animation:none; margin-bottom:20px;}
+}
+</style>
+</head>
+
+<body>
+
+<button id="themeToggle">🌙</button>
+
+<div class="container" id="app">
+
+  <div class="center">
+    <img src="logo.png">
+  </div>
+
+  <div class="item item1" onclick="goTo('https://jasimko-max.github.io/uznesenia/','manazer')">
+    <div class="icon">📊</div>Manažér
+  </div>
+
+  <div class="item item2" onclick="goTo('https://helpdesk-zsvisnove.jasimko.workers.dev','helpdesk')">
+    <div class="icon">🛠️</div>Helpdesk
+  </div>
+
+  <div class="item item3" onclick="goTo('https://jasimko-max.github.io/hodnotenie/jedalen-signal.html','dozor')">
+    <div class="icon">🍽️</div>Dozor v ŠJ
+  </div>
+
+  <div class="item item4" onclick="goTo('https://jasimko-max.github.io/hodnotenie/','hodnotenie')">
+    <div class="icon">✍️</div>Hodnotenie
+  </div>
+
+  <div class="item item5" onclick="goTo('https://jasimko-max.github.io/schanka_napadov/','napady')">
+    <div class="icon">💡</div>Nápady
+  </div>
+
+</div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbxkawQJQ-YHu-W-S9QV7gP9T8BQxbCrEd7lEb29gxz6ASNWQHbQUyT-co5kbJ9DepDJ/exec";
+
+/* LOAD ANIMÁCIA */
+window.addEventListener("load", () => {
+  setTimeout(() => {
+    document.getElementById("app").classList.add("loaded");
+  }, 200);
+
+  highlightTop();
+});
+
+/* NÁVRAT */
+window.addEventListener("pageshow", (e) => {
+  if (e.persisted) {
+    const app = document.getElementById("app");
+    app.classList.remove("loaded");
+    void app.offsetWidth;
+    setTimeout(() => app.classList.add("loaded"), 100);
+  }
+});
+
+/* DARK MODE */
+const toggle = document.getElementById("themeToggle");
+if (localStorage.getItem("theme") === "dark") {
+  document.body.classList.add("dark");
+}
+toggle.onclick = () => {
+  document.body.classList.toggle("dark");
+  localStorage.setItem("theme",
+    document.body.classList.contains("dark") ? "dark" : "light"
+  );
+};
+
+/* KLIK */
+function goTo(url, name) {
+
+  // LOCAL STATS
+  let stats = JSON.parse(localStorage.getItem("stats") || "{}");
+  stats[name] = (stats[name] || 0) + 1;
+  localStorage.setItem("stats", JSON.stringify(stats));
+
+  // GOOGLE SHEETS
+  fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({ app: name })
+  });
+
+  document.getElementById("app").classList.add("zooming");
+
+  setTimeout(() => {
+    window.location.href = url;
+  }, 500);
+}
+
+/* HIGHLIGHT TOP */
+function highlightTop() {
+  const stats = JSON.parse(localStorage.getItem("stats") || "{}");
+  let top = Object.keys(stats).sort((a,b)=>stats[b]-stats[a])[0];
+
+  if (!top) return;
+
+  document.querySelectorAll(".item").forEach(el => {
+    if (el.innerText.toLowerCase().includes(top)) {
+      el.style.boxShadow = "0 0 25px gold";
+    }
+  });
+}
+</script>
+
+</body>
+</html>

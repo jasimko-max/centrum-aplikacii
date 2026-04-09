@@ -3,222 +3,414 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Školský rozcestník</title>
-
+<title>Školský portál – ZŠ Višňové</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
 body {
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background: radial-gradient(circle at center, #ffffff, #eef2f7);
-  overflow: hidden;
-  transition: 0.3s;
-}
-
-/* DARK MODE */
-body.dark {
-  background: radial-gradient(circle, #1e2a38, #0f1720);
-  color: white;
-}
-
-/* TOGGLE */
-#themeToggle {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  border: none;
-  background: white;
-  padding: 10px;
-  border-radius: 50%;
-  cursor: pointer;
-}
-
-/* KONTAJNER */
-.container {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
-}
-
-/* LOGO */
-.center {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 140px;
-  height: 140px;
-  transform: translate(-50%, -50%) scale(0.85);
-  border-radius: 50%;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-  animation: pulse 2s infinite;
-  z-index: 5;
-}
-
-.center img {
-  width: 100%;
-  height: 100%;
-}
-
-/* PULZ */
-@keyframes pulse {
-  0% { transform: translate(-50%, -50%) scale(0.85); }
-  50% { transform: translate(-50%, -50%) scale(1); }
-  100% { transform: translate(-50%, -50%) scale(0.85); }
-}
-
-/* ITEM */
-.item {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 110px;
-  height: 110px;
-  border-radius: 50%;
-  color: white;
-  text-align: center;
+  background: #06091a;
+  font-family: 'Nunito', 'Segoe UI', sans-serif;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
+  align-items: center;
   justify-content: center;
-  transform: translate(-50%, -50%) scale(0.3);
-  opacity: 0;
-  transition: all 0.7s cubic-bezier(0.68,-0.55,0.27,1.55);
+  overflow: hidden;
+}
+
+canvas#stars {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Ambient glow in center of page */
+.page-glow {
+  position: fixed;
+  top: 50%; left: 50%;
+  width: 600px; height: 600px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(80,120,255,0.12) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  animation: glow-breathe 5s ease-in-out infinite;
+}
+
+@keyframes glow-breathe {
+  0%, 100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+}
+
+.page-header {
+  position: fixed;
+  top: 24px;
+  width: 100%;
+  text-align: center;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.page-header span {
+  color: rgba(180, 200, 255, 0.4);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+
+/* ---- orbit container ---- */
+.orbit-container {
+  position: relative;
+  width: 700px;
+  height: 700px;
+  z-index: 1;
+  flex-shrink: 0;
+}
+
+/* Two decorative orbit rings */
+.orbit-ring {
+  position: absolute;
+  top: 50%; left: 50%;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.ring-outer {
+  width: 560px; height: 560px;
+  border: 1px dashed rgba(255,255,255,0.08);
+  animation: spin-slow 60s linear infinite;
+}
+
+.ring-inner {
+  width: 440px; height: 440px;
+  border: 1px dotted rgba(100,150,255,0.15);
+  animation: spin-slow 30s linear infinite reverse;
+}
+
+@keyframes spin-slow { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+/* Orbit dots (markers on the ring at card angles) */
+.orbit-dot {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  margin: -5px 0 0 -5px;
+  background: rgba(255,255,255,0.3);
+  box-shadow: 0 0 8px rgba(255,255,255,0.5);
+  transform-origin: 0 0;
+}
+
+/* ---- center logo ---- */
+.center-logo {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 170px; height: 170px;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(145deg, rgba(30,50,120,0.8), rgba(10,20,60,0.9));
+  border: 2px solid rgba(120,160,255,0.3);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  z-index: 20;
+  animation: logo-pulse 4s ease-in-out infinite;
+  cursor: default;
+}
+
+/* School logo image - replace src with your actual logo */
+.center-logo img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+/* Fallback if no image */
+.logo-emoji {
+  font-size: 46px;
+  line-height: 1;
+}
+
+.school-name {
+  color: rgba(200,220,255,0.9);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+@keyframes logo-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 0 rgba(80,130,255,0.4),
+      0 0 40px rgba(60,100,255,0.2),
+      inset 0 0 30px rgba(30,60,180,0.3);
+  }
+  50% {
+    box-shadow:
+      0 0 0 18px rgba(80,130,255,0),
+      0 0 70px rgba(60,100,255,0.4),
+      inset 0 0 30px rgba(30,60,180,0.3);
+  }
+}
+
+/* ---- app cards ---- */
+.app-card {
+  position: absolute;
+  width: 148px;
+  height: 128px;
+  border-radius: 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
   cursor: pointer;
+  text-decoration: none;
+  padding: 16px 12px;
+  border: 1.5px solid rgba(255,255,255,0.18);
+  transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.35s ease;
+  animation: float 5s ease-in-out infinite;
 }
 
-.item:hover {
-  transform: translate(-50%, -50%) scale(1.2) !important;
+.app-card:nth-child(2) { animation-delay: -1s; }
+.app-card:nth-child(3) { animation-delay: -2s; }
+.app-card:nth-child(4) { animation-delay: -3s; }
+.app-card:nth-child(5) { animation-delay: -4s; }
+.app-card:nth-child(6) { animation-delay: -0.5s; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
 }
 
-/* ROZLET */
-.container.loaded .item1 { transform: rotate(0deg) translate(260px) rotate(0deg); opacity:1; background:#2D8CFF;}
-.container.loaded .item2 { transform: rotate(72deg) translate(260px) rotate(-72deg); opacity:1; background:#FF8C42;}
-.container.loaded .item3 { transform: rotate(144deg) translate(260px) rotate(-144deg); opacity:1; background:#28C76F;}
-.container.loaded .item4 { transform: rotate(216deg) translate(260px) rotate(-216deg); opacity:1; background:#9B59B6;}
-.container.loaded .item5 { transform: rotate(288deg) translate(260px) rotate(-288deg); opacity:1; background:#F1C40F;}
+.app-card:hover {
+  transform: translateY(-14px) scale(1.1) !important;
+  z-index: 50;
+}
 
-.item1 { transition-delay:0.1s;}
-.item2 { transition-delay:0.2s;}
-.item3 { transition-delay:0.3s;}
-.item4 { transition-delay:0.4s;}
-.item5 { transition-delay:0.5s;}
+.card-icon {
+  font-size: 34px;
+  line-height: 1;
+  margin-bottom: 10px;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4));
+}
 
-.icon { font-size:26px; }
+.card-title {
+  color: rgba(255,255,255,0.95);
+  font-size: 11.5px;
+  font-weight: 800;
+  line-height: 1.35;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
 
-/* ZOOM */
-.zooming .item { transform: scale(0.2)!important; opacity:0;}
-.zooming .center { transform: translate(-50%, -50%) scale(3); opacity:0; transition:0.5s;}
+/* Card colors with glass effect */
+/* Pentagon positions: radius=250px from center (350,350) of 700px container */
+/* Angles: -90°, -18°, 54°, 126°, 198°                                       */
+/* top = cy - 64, left = cx - 74                                              */
 
-/* MOBILE */
-@media(max-width:600px){
-  body { overflow:auto;}
-  .container { display:flex; flex-direction:column; align-items:center; padding-top:40px;}
-  .item { position:static; transform:none!important; opacity:1!important; margin:10px;}
-  .center { position:static; animation:none; margin-bottom:20px;}
+/* Card 1 – Školský manažér – BLUE – angle=-90°, pos=(350,100) */
+.card-1 {
+  top: 36px; left: 276px;
+  background: linear-gradient(145deg, rgba(13,71,161,0.82), rgba(25,118,210,0.72));
+  box-shadow: 0 8px 32px rgba(13,71,161,0.45), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+.card-1:hover { box-shadow: 0 20px 60px rgba(25,118,210,0.7), 0 0 0 2px rgba(100,181,246,0.5); }
+
+/* Card 2 – Školský helpdesk – ORANGE – angle=-18°, pos=(588,272) */
+.card-2 {
+  top: 208px; left: 514px;
+  background: linear-gradient(145deg, rgba(191,54,12,0.82), rgba(230,81,0,0.72));
+  box-shadow: 0 8px 32px rgba(191,54,12,0.45), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+.card-2:hover { box-shadow: 0 20px 60px rgba(230,81,0,0.7), 0 0 0 2px rgba(255,183,77,0.5); }
+
+/* Card 3 – Dozor v ŠJ – GREEN – angle=54°, pos=(497,552) */
+.card-3 {
+  top: 488px; left: 423px;
+  background: linear-gradient(145deg, rgba(27,94,32,0.82), rgba(46,125,50,0.72));
+  box-shadow: 0 8px 32px rgba(27,94,32,0.45), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+.card-3:hover { box-shadow: 0 20px 60px rgba(46,125,50,0.7), 0 0 0 2px rgba(129,199,132,0.5); }
+
+/* Card 4 – Generátor hodnotenia – PURPLE – angle=126°, pos=(203,552) */
+.card-4 {
+  top: 488px; left: 129px;
+  background: linear-gradient(145deg, rgba(74,20,140,0.82), rgba(123,31,162,0.72));
+  box-shadow: 0 8px 32px rgba(74,20,140,0.45), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+.card-4:hover { box-shadow: 0 20px 60px rgba(123,31,162,0.7), 0 0 0 2px rgba(206,147,216,0.5); }
+
+/* Card 5 – Schránka nápadov – TEAL – angle=198°, pos=(112,272) */
+.card-5 {
+  top: 208px; left: 38px;
+  background: linear-gradient(145deg, rgba(0,96,100,0.82), rgba(0,131,143,0.72));
+  box-shadow: 0 8px 32px rgba(0,96,100,0.45), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+.card-5:hover { box-shadow: 0 20px 60px rgba(0,131,143,0.7), 0 0 0 2px rgba(77,208,225,0.5); }
+
+/* Connection lines SVG (behind cards) */
+.connections {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Responsive scale */
+@media (max-width: 780px) {
+  .orbit-container { transform: scale(0.75); }
+}
+@media (max-width: 560px) {
+  .orbit-container { transform: scale(0.52); }
 }
 </style>
 </head>
-
 <body>
 
-<button id="themeToggle">🌙</button>
+<canvas id="stars"></canvas>
+<div class="page-glow"></div>
+<div class="page-header"><span>ZŠ Višňové &nbsp;·&nbsp; Školský portál</span></div>
 
-<div class="container" id="app">
+<div class="orbit-container">
 
-  <div class="center">
-    <img src="logo.png">
+  <!-- Decorative rings -->
+  <div class="orbit-ring ring-outer"></div>
+  <div class="orbit-ring ring-inner"></div>
+
+  <!-- Connection lines from center to each card -->
+  <svg class="connections" viewBox="0 0 700 700" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="lineGrad" cx="50%" cy="50%" r="50%">
+        <stop offset="30%" stop-color="rgba(100,150,255,0.3)"/>
+        <stop offset="100%" stop-color="rgba(100,150,255,0)"/>
+      </radialGradient>
+    </defs>
+    <!-- center=350,350; card centers: (350,100),(588,272),(497,552),(203,552),(112,272) -->
+    <line x1="350" y1="350" x2="350" y2="100" stroke="url(#lineGrad)" stroke-width="1" stroke-dasharray="5,6"/>
+    <line x1="350" y1="350" x2="588" y2="272" stroke="url(#lineGrad)" stroke-width="1" stroke-dasharray="5,6"/>
+    <line x1="350" y1="350" x2="497" y2="552" stroke="url(#lineGrad)" stroke-width="1" stroke-dasharray="5,6"/>
+    <line x1="350" y1="350" x2="203" y2="552" stroke="url(#lineGrad)" stroke-width="1" stroke-dasharray="5,6"/>
+    <line x1="350" y1="350" x2="112" y2="272" stroke="url(#lineGrad)" stroke-width="1" stroke-dasharray="5,6"/>
+  </svg>
+
+  <!-- Center logo -->
+  <div class="center-logo">
+    <!--
+      Ak chcete použiť vlastné logo školy, odkomentujte nasledujúci riadok
+      a nastavte správnu cestu k obrázku. Inak sa zobrazí emoji:
+      <img src="logo.png" alt="ZŠ Višňové" onerror="this.style.display='none'">
+    -->
+    <img src="logo.png" alt="ZŠ Višňové" style="width:80px;height:80px;object-fit:contain;border-radius:12px;">
+    <div class="school-name">ZŠ<br>Višňové</div>
   </div>
 
-  <div class="item item1" onclick="goTo('https://jasimko-max.github.io/uznesenia/','manazer')">
-    <div class="icon">📊</div>Manažér
-  </div>
+  <!-- App card 1 – Školský manažér -->
+  <a href="https://jasimko-max.github.io/uznesenia/" target="_blank" class="app-card card-1">
+    <div class="card-icon">📋</div>
+    <div class="card-title">Školský manažér</div>
+  </a>
 
-  <div class="item item2" onclick="goTo('https://helpdesk-zsvisnove.jasimko.workers.dev','helpdesk')">
-    <div class="icon">🛠️</div>Helpdesk
-  </div>
+  <!-- App card 2 – Školský helpdesk -->
+  <a href="https://helpdesk-zsvisnove.jasimko.workers.dev" target="_blank" class="app-card card-2">
+    <div class="card-icon">🛠️</div>
+    <div class="card-title">Školský helpdesk</div>
+  </a>
 
-  <div class="item item3" onclick="goTo('https://jasimko-max.github.io/hodnotenie/jedalen-signal.html','dozor')">
-    <div class="icon">🍽️</div>Dozor v ŠJ
-  </div>
+  <!-- App card 3 – Dozor v ŠJ -->
+  <a href="https://jasimko-max.github.io/hodnotenie/jedalen-signal.html" target="_blank" class="app-card card-3">
+    <div class="card-icon">🍽️</div>
+    <div class="card-title">Dozor v ŠJ</div>
+  </a>
 
-  <div class="item item4" onclick="goTo('https://jasimko-max.github.io/hodnotenie/','hodnotenie')">
-    <div class="icon">✍️</div>Hodnotenie
-  </div>
+  <!-- App card 4 – Generátor hodnotenia -->
+  <a href="https://jasimko-max.github.io/hodnotenie/" target="_blank" class="app-card card-4">
+    <div class="card-icon">📝</div>
+    <div class="card-title">Generátor slovného hodnotenia</div>
+  </a>
 
-  <div class="item item5" onclick="goTo('https://jasimko-max.github.io/schanka_napadov/','napady')">
-    <div class="icon">💡</div>Nápady
-  </div>
+  <!-- App card 5 – Schránka nápadov -->
+  <a href="https://jasimko-max.github.io/schanka_napadov/" target="_blank" class="app-card card-5">
+    <div class="card-icon">💡</div>
+    <div class="card-title">Schránka nápadov</div>
+  </a>
 
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxkawQJQ-YHu-W-S9QV7gP9T8BQxbCrEd7lEb29gxz6ASNWQHbQUyT-co5kbJ9DepDJ/exec";
+// ---- Twinkling star particles ----
+const canvas = document.getElementById('stars');
+const ctx = canvas.getContext('2d');
+let W, H, stars = [];
 
-/* LOAD ANIMÁCIA */
-window.addEventListener("load", () => {
-  setTimeout(() => {
-    document.getElementById("app").classList.add("loaded");
-  }, 200);
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
 
-  highlightTop();
-});
-
-/* NÁVRAT */
-window.addEventListener("pageshow", (e) => {
-  if (e.persisted) {
-    const app = document.getElementById("app");
-    app.classList.remove("loaded");
-    void app.offsetWidth;
-    setTimeout(() => app.classList.add("loaded"), 100);
+function initStars() {
+  stars = [];
+  for (let i = 0; i < 180; i++) {
+    stars.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: Math.random() * 1.4 + 0.3,
+      alpha: Math.random() * 0.6 + 0.15,
+      speed: Math.random() * 0.4 + 0.1,
+      phase: Math.random() * Math.PI * 2
+    });
   }
+}
+
+function animate(t) {
+  ctx.clearRect(0, 0, W, H);
+  const ts = t * 0.001;
+  for (const s of stars) {
+    const a = s.alpha * (0.55 + 0.45 * Math.sin(ts * s.speed + s.phase));
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(200,220,255,${a})`;
+    ctx.fill();
+  }
+  requestAnimationFrame(animate);
+}
+
+resize();
+initStars();
+window.addEventListener('resize', () => { resize(); initStars(); });
+requestAnimationFrame(animate);
+
+// ---- Ripple on card click ----
+document.querySelectorAll('.app-card').forEach(card => {
+  card.addEventListener('click', function(e) {
+    const ripple = document.createElement('span');
+    ripple.style.cssText = `
+      position:absolute; border-radius:50%; pointer-events:none;
+      background:rgba(255,255,255,0.3);
+      width:10px; height:10px;
+      top:${e.offsetY - 5}px; left:${e.offsetX - 5}px;
+      transform:scale(0); opacity:1;
+      animation: ripple-anim 0.5s ease-out forwards;
+    `;
+    const styleEl = document.getElementById('ripple-style') || (() => {
+      const s = document.createElement('style');
+      s.id = 'ripple-style';
+      s.textContent = '@keyframes ripple-anim{to{transform:scale(20);opacity:0}}';
+      document.head.appendChild(s);
+      return s;
+    })();
+    card.style.position = 'absolute';
+    card.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 600);
+  });
 });
-
-/* DARK MODE */
-const toggle = document.getElementById("themeToggle");
-if (localStorage.getItem("theme") === "dark") {
-  document.body.classList.add("dark");
-}
-toggle.onclick = () => {
-  document.body.classList.toggle("dark");
-  localStorage.setItem("theme",
-    document.body.classList.contains("dark") ? "dark" : "light"
-  );
-};
-
-/* KLIK */
-function goTo(url, name) {
-
-  // LOCAL STATS
-  let stats = JSON.parse(localStorage.getItem("stats") || "{}");
-  stats[name] = (stats[name] || 0) + 1;
-  localStorage.setItem("stats", JSON.stringify(stats));
-
-  // GOOGLE SHEETS
-  fetch(API_URL, {
-    method: "POST",
-    body: JSON.stringify({ app: name })
-  });
-
-  document.getElementById("app").classList.add("zooming");
-
-  setTimeout(() => {
-    window.location.href = url;
-  }, 500);
-}
-
-/* HIGHLIGHT TOP */
-function highlightTop() {
-  const stats = JSON.parse(localStorage.getItem("stats") || "{}");
-  let top = Object.keys(stats).sort((a,b)=>stats[b]-stats[a])[0];
-
-  if (!top) return;
-
-  document.querySelectorAll(".item").forEach(el => {
-    if (el.innerText.toLowerCase().includes(top)) {
-      el.style.boxShadow = "0 0 25px gold";
-    }
-  });
-}
 </script>
-
 </body>
 </html>
